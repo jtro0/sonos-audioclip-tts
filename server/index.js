@@ -61,7 +61,7 @@ const oauth2 = simpleOauthModule.create({
 
 // Authorization uri definition
 const authorizationUri = oauth2.authorizationCode.authorizeURL({
-  redirect_uri: 'https://picroft.jtroo.nl:3001/redirect',
+  redirect_uri: 'https://picroft.jtroo.nl:3002/redirect',
   scope: 'playback-control-all',
   state: 'blahblah',
 });
@@ -101,7 +101,7 @@ app.get('/auth', async (req, res) => {
 // redirect service parsing the authorization token and asking for the access token
 app.get('/redirect', async (req, res) => {
   const code = req.query.code;
-  const redirect_uri = 'https://picroft.jtroo.nl:3001/redirect';
+  const redirect_uri = 'https://picroft.jtroo.nl:3002/redirect';
 
   const options = {
     code,redirect_uri,
