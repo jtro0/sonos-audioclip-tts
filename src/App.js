@@ -66,7 +66,7 @@ class App extends Component {
           this.hhChange();
         }
         else if (json.authRequired) { // if we weren't successful, let's check and see if we've been told to auth, and if so, send user to auth endpoint
-          window.location='http://localhost:3001/auth';
+          window.location='https://picroft.jtroo.nl:3002/auth';
         }
         else { // if all else fails, just put an error on the screen and let the user figure it out
           this.setState({

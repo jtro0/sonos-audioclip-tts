@@ -116,7 +116,7 @@ app.get('/redirect', async (req, res) => {
 
     await storage.setItem('token',token); // And save it to local storage for use the next time we start the app
     authRequired = false; // And we're all good now. Don't need auth any more
-    res.redirect('https://picroft.jtroo.nl:3000'); // Head back to the main app
+    res.redirect('http://picroft.jtroo.nl:3000'); // Head back to the main app
   } catch(error) {
     console.error('Access Token Error', error.message);
     return res.status(500).json('Authentication failed');
