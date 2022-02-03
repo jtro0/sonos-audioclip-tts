@@ -29,6 +29,13 @@ const pino = require('express-pino-logger')();
 const simpleOauthModule = require('simple-oauth2');
 const googleTTS = require('google-tts-api');
 const storage = require('node-persist');
+const https = require("https");
+const fs = require("fs");
+
+const options = {
+  key: fs.readFileSync(".cert/my-site-key.pem"),
+  cert: fs.readFileSync(".cert/chain.pem")
+};
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -54,7 +61,7 @@ const oauth2 = simpleOauthModule.create({
 
 // Authorization uri definition
 const authorizationUri = oauth2.authorizationCode.authorizeURL({
-  redirect_uri: 'http://localhost:3001/redirect',
+  redirect_uri: 'https://picroft.jtroo.nl:3001/redirect',
   scope: 'playback-control-all',
   state: 'blahblah',
 });
@@ -94,7 +101,7 @@ app.get('/auth', async (req, res) => {
 // redirect service parsing the authorization token and asking for the access token
 app.get('/redirect', async (req, res) => {
   const code = req.query.code;
-  const redirect_uri = 'http://localhost:3001/redirect';
+  const redirect_uri = 'https://picroft.jtroo.nl:3001/redirect';
 
   const options = {
     code,redirect_uri,
@@ -109,7 +116,7 @@ app.get('/redirect', async (req, res) => {
 
     await storage.setItem('token',token); // And save it to local storage for use the next time we start the app
     authRequired = false; // And we're all good now. Don't need auth any more
-    res.redirect('http://localhost:3000'); // Head back to the main app
+    res.redirect('https://picroft.jtroo.nl:3000'); // Head back to the main app
   } catch(error) {
     console.error('Access Token Error', error.message);
     return res.status(500).json('Authentication failed');
@@ -271,3 +278,4 @@ app.get('/api/speakText', async (req, res) => {
 app.listen(3001, () =>
   console.log('Express server is running on localhost:3001')
 );
+https.createServer(options, app).listen(3002);
