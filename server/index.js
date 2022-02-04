@@ -272,7 +272,9 @@ app.get('/api/speakText', async (req, res) => {
                 speakTextRes.send(JSON.stringify({'success': false, 'error': audioClipResText}));
             }
             await (async function () {
+                console.log("waiting 1 second...")
                 await timer(1000);
+                console.log("done!")
             })()
         }
     } catch (err) {
