@@ -227,7 +227,7 @@ app.get('/api/speakText', async (req, res) => {
     let speechUrl;
 
     try { // Let's make a call to the google tts api and get the url for our TTS file
-        speechUrls = googleTTS.getAudioUrls(text, {
+        speechUrls = googleTTS.getAllAudioUrls(text, {
             lang: 'en',
             slow: false,
             host: 'https://translate.google.com',
