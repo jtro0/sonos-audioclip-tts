@@ -289,7 +289,7 @@ app.get('/api/chime', async (req, res) => {
     return;
   }
 
-  const body = {name: 'Sonos TTS', appId: 'com.me.sonosspeech',  clipType: 'CHIME', priority: "HIGH"};
+  const body = {name: 'Sonos TTS', appId: 'com.me.sonosspeech',  clipType: 'CHIME'};
 
   let audioClipRes;
 
