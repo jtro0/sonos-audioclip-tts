@@ -273,7 +273,7 @@ app.get('/api/speakText', async (req, res) => {
             }
             await (async function () {
                 console.log("waiting 1 second...")
-                await timer(1000);
+                await timer(5000);
                 console.log("done!")
             })()
         }
