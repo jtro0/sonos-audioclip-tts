@@ -227,11 +227,11 @@ app.get('/api/speakText', async (req, res) => {
     let speechUrl;
 
     try { // Let's make a call to the google tts api and get the url for our TTS file
-        speechUrls = googleTTS.getAudioUrl(text, {
+        speechUrls = googleTTS.getAllAudioUrls(text, {
             lang: 'en',
             slow: false,
             host: 'https://translate.google.com',
-            // splitPunct: ',.?'
+            splitPunct: ',.?'
         });
         console.log(speechUrls);
     } catch (err) {
@@ -239,8 +239,8 @@ app.get('/api/speakText', async (req, res) => {
         return;
     }
 
-    // for (const [short, url] of speechUrls) {
-        const body = {streamUrl: speechUrls, name: 'Sonos TTS', appId: 'com.me.sonosspeech', priority: 'HIGH', volume: 60};
+    for (const [short, url] of speechUrls) {
+        const body = {streamUrl: url, name: 'Sonos TTS', appId: 'com.me.sonosspeech', priority: 'HIGH', volume: 40};
 
         let audioClipRes;
 
@@ -267,7 +267,7 @@ app.get('/api/speakText', async (req, res) => {
         } catch (err) {
             speakTextRes.send(JSON.stringify({'success': false, 'error': audioClipResText}));
         }
-    // }
+    }
 });
 
 app.get('/api/chime', async (req, res) => {
@@ -284,7 +284,7 @@ app.get('/api/chime', async (req, res) => {
         return;
     }
 
-    const body = {name: 'Sonos TTS', appId: 'com.me.sonosspeech', clipType: 'CHIME', volume: 70};
+    const body = {name: 'Sonos TTS', appId: 'com.me.sonosspeech', clipType: 'CHIME', volume: 50};
 
     let audioClipRes;
 
