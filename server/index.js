@@ -243,7 +243,7 @@ app.get('/api/speakText', async (req, res) => {
     return;
   }
 
-  const body = { streamUrl: speechUrl, name: 'Sonos TTS', appId: 'com.me.sonosspeech' };
+  const body = { streamUrl: speechUrl, name: 'Sonos TTS', appId: 'com.me.sonosspeech', priority: 'HIGH' };
 
   let audioClipRes;
 
