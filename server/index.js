@@ -37,6 +37,8 @@ const options = {
     cert: fs.readFileSync(".cert/chain.pem")
 };
 
+const timer = ms => new Promise( res => setTimeout(res, ms));
+
 const app = express();
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(pino);
@@ -269,6 +271,9 @@ app.get('/api/speakText', async (req, res) => {
             } catch (err) {
                 speakTextRes.send(JSON.stringify({'success': false, 'error': audioClipResText}));
             }
+            await (async function () {
+                await timer(1000);
+            })()
         }
     } catch (err) {
         speakTextRes.send(JSON.stringify({'success': false, error: err.stack}));
