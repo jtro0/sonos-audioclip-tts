@@ -275,6 +275,52 @@ app.get('/api/speakText', async (req, res) => {
   }
 });
 
+app.get('/api/chime', async (req, res) => {
+  const playerId = req.query.playerId;
+
+  const chimeRes = res;
+  chimeRes.setHeader('Content-Type', 'application/json');
+  if (authRequired) {
+    res.send(JSON.stringify({'success':false,authRequired:true}));
+  }
+
+  if (text == null || playerId == null) { // Return if either is null
+    chimeRes.send(JSON.stringify({'success':false,error: 'Missing Parameters'}));
+    return;
+  }
+
+  const body = {name: 'Sonos TTS', appId: 'com.me.sonosspeech',  clipType: 'CHIME', priority: "HIGH"};
+
+  let audioClipRes;
+
+  try { // And call the audioclip API, with the playerId in the url path, and the text in the JSON body
+    audioClipRes = await fetch(`https://api.ws.sonos.com/control/api/v1/players/${playerId}/audioClip`, {
+     method: 'POST',
+      body:    JSON.stringify(body),
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token.token.access_token}` },
+    });
+  }
+  catch (err) {
+    chimeRes.send(JSON.stringify({'success':false,error: err.stack}));
+    return;
+  }
+
+  const audioClipResText = await audioClipRes.text(); // Same thing as above: convert to text, since occasionally the Sonos API returns text
+
+  try  {
+    const json = JSON.parse(audioClipResText);
+    if (json.id !== undefined) {
+      chimeRes.send(JSON.stringify({'success': true}));
+    }
+    else {
+      chimeRes.send(JSON.stringify({'success': false, 'error':json.errorCode}));
+    }
+  }
+  catch (err){
+    chimeRes.send(JSON.stringify({'success':false, 'error': audioClipResText}));
+  }
+});
+
 app.listen(3001, () =>
   console.log('Express server is running on localhost:3001')
 );
