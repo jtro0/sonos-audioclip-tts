@@ -255,6 +255,7 @@ app.get('/api/speakText', async (req, res) => {
                         'Authorization': `Bearer ${token.token.access_token}`
                     },
                 });
+                console.log(audioClipRes)
             } catch (err) {
                 speakTextRes.send(JSON.stringify({'success': false, error: err.stack}));
                 return;
@@ -263,6 +264,8 @@ app.get('/api/speakText', async (req, res) => {
 
             try {
                 const json = JSON.parse(audioClipResText);
+                console.log(json)
+
                 if (json.id !== undefined) {
                     speakTextRes.send(JSON.stringify({'success': true}));
                 } else {
