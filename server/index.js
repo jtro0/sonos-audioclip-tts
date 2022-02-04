@@ -224,49 +224,54 @@ app.get('/api/speakText', async (req, res) => {
         return;
     }
 
-    let speechUrl;
-
+    let speechUrls;
     try { // Let's make a call to the google tts api and get the url for our TTS file
-        speechUrls = googleTTS.getAllAudioUrls(text, {
-            lang: 'en',
-            slow: false,
-            host: 'https://translate.google.com',
-            splitPunct: ',.?'
-        });
+        speechUrls = googleTTS.getAllAudioUrls(text);
         console.log(speechUrls);
     } catch (err) {
         speakTextRes.send(JSON.stringify({'success': false, error: err.stack}));
         return;
     }
+    try {
+        for (const item of speechUrls) {
+            const body = {
+                streamUrl: item.url,
+                name: 'Sonos TTS',
+                appId: 'com.me.sonosspeech',
+                priority: 'HIGH',
+                volume: 40
+            };
 
-    for (const [short, url] of speechUrls) {
-        const body = {streamUrl: url, name: 'Sonos TTS', appId: 'com.me.sonosspeech', priority: 'HIGH', volume: 40};
+            let audioClipRes;
 
-        let audioClipRes;
-
-        try { // And call the audioclip API, with the playerId in the url path, and the text in the JSON body
-            audioClipRes = await fetch(`https://api.ws.sonos.com/control/api/v1/players/${playerId}/audioClip`, {
-                method: 'POST',
-                body: JSON.stringify(body),
-                headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${token.token.access_token}`},
-            });
-        } catch (err) {
-            speakTextRes.send(JSON.stringify({'success': false, error: err.stack}));
-            return;
-        }
-
-        const audioClipResText = await audioClipRes.text(); // Same thing as above: convert to text, since occasionally the Sonos API returns text
-
-        try {
-            const json = JSON.parse(audioClipResText);
-            if (json.id !== undefined) {
-                speakTextRes.send(JSON.stringify({'success': true}));
-            } else {
-                speakTextRes.send(JSON.stringify({'success': false, 'error': json.errorCode}));
+            try { // And call the audioclip API, with the playerId in the url path, and the text in the JSON body
+                audioClipRes = await fetch(`https://api.ws.sonos.com/control/api/v1/players/${playerId}/audioClip`, {
+                    method: 'POST',
+                    body: JSON.stringify(body),
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token.token.access_token}`
+                    },
+                });
+            } catch (err) {
+                speakTextRes.send(JSON.stringify({'success': false, error: err.stack}));
+                return;
             }
-        } catch (err) {
-            speakTextRes.send(JSON.stringify({'success': false, 'error': audioClipResText}));
+            const audioClipResText = await audioClipRes.text(); // Same thing as above: convert to text, since occasionally the Sonos API returns text
+
+            try {
+                const json = JSON.parse(audioClipResText);
+                if (json.id !== undefined) {
+                    speakTextRes.send(JSON.stringify({'success': true}));
+                } else {
+                    speakTextRes.send(JSON.stringify({'success': false, 'error': json.errorCode}));
+                }
+            } catch (err) {
+                speakTextRes.send(JSON.stringify({'success': false, 'error': audioClipResText}));
+            }
         }
+    } catch (err) {
+        speakTextRes.send(JSON.stringify({'success': false, error: err.stack}));
     }
 });
 
