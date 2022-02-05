@@ -241,79 +241,82 @@ app.get('/api/speakText', async (req, res) => {
         return;
     }
 
-    async function* sendUrls(gen) {
-        for (const item of speechUrls) {
-            const body = {
-                streamUrl: item.url,
-                name: 'Sonos TTS',
-                appId: 'com.me.sonosspeech',
-                priority: 'HIGH',
-                volume: 30
-            };
+    async function* sendUrl(gen, url) {
+        const body = {
+            streamUrl: url,
+            name: 'Sonos TTS',
+            appId: 'com.me.sonosspeech',
+            priority: 'HIGH',
+            volume: 30
+        };
 
-            let audioClipRes;
+        let audioClipRes;
 
-            try { // And call the audioclip API, with the playerId in the url path, and the text in the JSON body
-                audioClipRes = await fetch(`https://api.ws.sonos.com/control/api/v1/players/${playerId}/audioClip`, {
-                    method: 'POST',
-                    body: JSON.stringify(body),
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token.token.access_token}`
-                    },
-                });
-                console.log(audioClipRes)
-            } catch (err) {
-                speakTextRes.send(JSON.stringify({'success': false, error: err.stack}));
-                return;
-            }
-            let audioClipResText;
-
-            try {
-                audioClipResText = await audioClipRes.text(); // Same thing as above: convert to text, since occasionally the Sonos API returns text
-            } catch (err) {
-                console.log(audioClipRes);
-            }
-            try {
-                const json = JSON.parse(audioClipResText);
-                console.log(json)
-
-                if (json.id !== undefined) {
-                    console.log('Sent "${item.shortText}"')
-                } else {
-                    speakTextRes.send(JSON.stringify({'success': false, 'error': json.errorCode}));
-                    return;
-                }
-            } catch (err) {
-                speakTextRes.send(JSON.stringify({'success': false, 'error': audioClipResText}));
-                return;
-            }
-
-            console.log("Writing " + item.url);
-            const file = fs.createWriteStream('temp.mp3');
-            await https.get(item.url, res => res.pipe(file));
-            yield file.on('finish', () => {
-                console.log("Done writing");
-                file.end();
-                getAudioDurationInSeconds('temp.mp3').then((duration) => {
-                    console.log("text takes: " + duration);
-                    if (speechUrls.indexOf(item) !== 0) {
-                        const ms = duration * 1000;
-                        console.log("waiting %f ms", ms)
-                        setTimeout(gen(), duration * 1000);
-                        console.log("done!")
-                    }
-                });
+        try { // And call the audioclip API, with the playerId in the url path, and the text in the JSON body
+            audioClipRes = await fetch(`https://api.ws.sonos.com/control/api/v1/players/${playerId}/audioClip`, {
+                method: 'POST',
+                body: JSON.stringify(body),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token.token.access_token}`
+                },
             });
-        }
-    }
-    run(function* (gen) {
-        try {
-            yield* sendUrls(gen)
+            console.log(audioClipRes)
         } catch (err) {
-            // speakTextRes.send(JSON.stringify({'success': false, error: err.stack}));
-            console.log("Oh oh...");
+            speakTextRes.send(JSON.stringify({'success': false, error: err.stack}));
+            return;
         }
+        let audioClipResText;
+
+        try {
+            audioClipResText = await audioClipRes.text(); // Same thing as above: convert to text, since occasionally the Sonos API returns text
+        } catch (err) {
+            console.log(audioClipRes);
+        }
+        try {
+            const json = JSON.parse(audioClipResText);
+            console.log(json)
+
+            if (json.id !== undefined) {
+                console.log('Sent "${item.shortText}"')
+            } else {
+                speakTextRes.send(JSON.stringify({'success': false, 'error': json.errorCode}));
+                return;
+            }
+        } catch (err) {
+            speakTextRes.send(JSON.stringify({'success': false, 'error': audioClipResText}));
+            return;
+        }
+
+        console.log("Writing " + item.url);
+        const file = fs.createWriteStream('temp.mp3');
+        await https.get(item.url, res => res.pipe(file));
+        yield file.on('finish', () => {
+            console.log("Done writing");
+            file.end();
+            getAudioDurationInSeconds('temp.mp3').then((duration) => {
+                console.log("text takes: " + duration);
+                if (speechUrls.indexOf(item) !== 0) {
+                    const ms = duration * 1000;
+                    console.log("waiting %f ms", ms)
+                    setTimeout(gen(), duration * 1000);
+                    console.log("done!")
+                }
+            });
+        });
+    }
+
+    run(function* (gen) {
+        for (const item of speechUrls) {
+
+            try {
+                yield* sendUrl(gen, item.url)
+            } catch (err) {
+                // speakTextRes.send(JSON.stringify({'success': false, error: err.stack}));
+                console.log("Oh oh...");
+            }
+        }
+
     });
     // try {
     //
