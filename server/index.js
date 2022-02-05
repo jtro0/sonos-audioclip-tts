@@ -253,8 +253,6 @@ app.get('/api/speakText', async (req, res) => {
                 volume: 30
             };
 
-            let audioClipRes;
-
             try { // And call the audioclip API, with the playerId in the url path, and the text in the JSON body
                 yield fetch(`https://api.ws.sonos.com/control/api/v1/players/${playerId}/audioClip`, {
                     method: 'POST',
@@ -264,8 +262,6 @@ app.get('/api/speakText', async (req, res) => {
                         'Authorization': `Bearer ${token.token.access_token}`
                     },
                 }).then((audioClipRes) => {
-                    let audioClipResText;
-
                     try {
                         audioClipRes.text().then((audioClipResText) => {
                             try {
@@ -291,12 +287,12 @@ app.get('/api/speakText', async (req, res) => {
                                 file.end();
                                 getAudioDurationInSeconds('temp.mp3').then((duration) => {
                                     console.log("text takes: " + duration);
-                                    if (index !== 0) {
+                                    // if (index !== 0) {
                                         const ms = duration * 1000;
                                         console.log("waiting %f ms", ms)
-                                        setTimeout(gen(), duration * 1000);
+                                        setTimeout(gen(), ms);
                                         console.log("done!")
-                                    }
+                                    // }
                                 });
                             });
                         }); // Same thing as above: convert to text, since occasionally the Sonos API returns text
