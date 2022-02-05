@@ -248,7 +248,7 @@ app.get('/api/speakText', async (req, res) => {
                 console.log("Done writing");
                 file.end();
                 getAudioDurationInSeconds('temp.mp3').then((duration) => {
-                    console.log(duration);
+                    console.log("text takes: " + duration);
                 });
             });
 
