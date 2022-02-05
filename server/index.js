@@ -303,11 +303,11 @@ app.get('/api/speakText', async (req, res) => {
         }
     }
     run(function* () {
-        try {
+        // try {
             yield* sendUrls()
-        } catch (err) {
-            speakTextRes.send(JSON.stringify({'success': false, error: err.stack}));
-        }
+        // } catch (err) {
+        //     speakTextRes.send(JSON.stringify({'success': false, error: err.stack}));
+        // }
     });
     // try {
     //
