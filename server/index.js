@@ -244,6 +244,7 @@ app.get('/api/speakText', async (req, res) => {
             await https.get(item.url, (stream) => {
                 const file = fs.createWriteStream("./temp.mp3");
                 stream.pipe(file);
+                stream.end()
             });
 
             const stream = await fs.createReadStream('./temp.mp3');
