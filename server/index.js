@@ -244,22 +244,15 @@ app.get('/api/speakText', async (req, res) => {
             console.log("Writing " + item.url);
             const file = fs.createWriteStream('temp.mp3');
             await https.get(item.url, res => res.pipe(file));
-            file.on('finish', () => {
+            let duration;
+            file.on('finish', async () => {
                 console.log("Done writing");
                 file.end();
-                getAudioDurationInSeconds('temp.mp3').then((duration) => {
+                duration = await getAudioDurationInSeconds('temp.mp3').then((duration) => {
                     console.log("text takes: " + duration);
                 });
             });
 
-
-            if (speechUrls.indexOf(item) !== 0) {
-                await (async function () {
-                    console.log("waiting 1 second...")
-                    await timer(5000);
-                    console.log("done!")
-                })()
-            }
             const body = {
                 streamUrl: item.url,
                 name: 'Sonos TTS',
@@ -301,6 +294,13 @@ app.get('/api/speakText', async (req, res) => {
                 return;
             }
 
+            if (speechUrls.indexOf(item) !== 0) {
+                await (async function () {
+                    console.log("waiting 1 second...")
+                    await timer(duration*1000);
+                    console.log("done!")
+                })()
+            }
         }
     } catch (err) {
         speakTextRes.send(JSON.stringify({'success': false, error: err.stack}));
