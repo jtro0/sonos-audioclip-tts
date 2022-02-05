@@ -296,7 +296,8 @@ app.get('/api/speakText', async (req, res) => {
 
             if (speechUrls.indexOf(item) !== 0) {
                 await (async function () {
-                    console.log("waiting 1 second...")
+                    const ms = duration*1000;
+                    console.log("waiting %f ms", ms)
                     await timer(duration*1000);
                     console.log("done!")
                 })()
