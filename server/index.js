@@ -241,7 +241,7 @@ app.get('/api/speakText', async (req, res) => {
         return;
     }
 
-    async function* sendUrl(gen, url) {
+    function* sendUrl(gen, url) {
         const body = {
             streamUrl: url,
             name: 'Sonos TTS',
@@ -253,7 +253,7 @@ app.get('/api/speakText', async (req, res) => {
         let audioClipRes;
 
         try { // And call the audioclip API, with the playerId in the url path, and the text in the JSON body
-            audioClipRes = await fetch(`https://api.ws.sonos.com/control/api/v1/players/${playerId}/audioClip`, {
+            audioClipRes = fetch(`https://api.ws.sonos.com/control/api/v1/players/${playerId}/audioClip`, {
                 method: 'POST',
                 body: JSON.stringify(body),
                 headers: {
@@ -269,7 +269,7 @@ app.get('/api/speakText', async (req, res) => {
         let audioClipResText;
 
         try {
-            audioClipResText = await audioClipRes.text(); // Same thing as above: convert to text, since occasionally the Sonos API returns text
+            audioClipResText = audioClipRes.text(); // Same thing as above: convert to text, since occasionally the Sonos API returns text
         } catch (err) {
             console.log(audioClipRes);
         }
@@ -290,7 +290,7 @@ app.get('/api/speakText', async (req, res) => {
 
         console.log("Writing " + item.url);
         const file = fs.createWriteStream('temp.mp3');
-        await https.get(item.url, res => res.pipe(file));
+        https.get(item.url, res => res.pipe(file));
         yield file.on('finish', () => {
             console.log("Done writing");
             file.end();
