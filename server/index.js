@@ -286,10 +286,10 @@ app.get('/api/speakText', async (req, res) => {
             console.log("Writing " + item.url);
             const file = fs.createWriteStream('temp.mp3');
             await https.get(item.url, res => res.pipe(file));
-            file.on('finish', async () => {
+            await file.on('finish', async () => {
                 console.log("Done writing");
                 file.end();
-                getAudioDurationInSeconds('temp.mp3').then(async (duration) => {
+                await getAudioDurationInSeconds('temp.mp3').then(async (duration) => {
                     console.log("text takes: " + duration);
                     if (speechUrls.indexOf(item) !== 0) {
                         await(async function () {
