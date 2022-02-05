@@ -236,6 +236,13 @@ app.get('/api/speakText', async (req, res) => {
     }
     try {
         for (const item of speechUrls) {
+            if (speechUrls.index(item) !== 0) {
+                await (async function () {
+                    console.log("waiting 1 second...")
+                    await timer(5000);
+                    console.log("done!")
+                })()
+            }
             const body = {
                 streamUrl: item.url,
                 name: 'Sonos TTS',
@@ -276,11 +283,7 @@ app.get('/api/speakText', async (req, res) => {
                 speakTextRes.send(JSON.stringify({'success': false, 'error': audioClipResText}));
                 return;
             }
-            await (async function () {
-                console.log("waiting 1 second...")
-                await timer(5000);
-                console.log("done!")
-            })()
+
         }
     } catch (err) {
         speakTextRes.send(JSON.stringify({'success': false, error: err.stack}));
