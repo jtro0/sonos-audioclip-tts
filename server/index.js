@@ -294,12 +294,8 @@ app.get('/api/chime', async (req, res) => {
         res.send(JSON.stringify({'success': false, authRequired: true}));
     }
 
-    if (text == null || playerId == null) { // Return if either is null
-        try {
-            chimeRes.send(JSON.stringify({'success': false, error: 'Missing Parameters'}));
-        } catch (err) {
-            console.log("Error!")
-        }
+    if (playerId == null) { // Return if either is null
+        chimeRes.send(JSON.stringify({'success': false, error: 'Missing Parameters'}));
         return;
     }
 
