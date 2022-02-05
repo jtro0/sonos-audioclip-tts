@@ -235,7 +235,6 @@ app.get('/api/speakText', async (req, res) => {
         speakTextRes.send(JSON.stringify({'success': false, error: err.stack}));
         return;
     }
-    const pipeline = promisify(stream.pipeline);
 
     try {
         for (const item of speechUrls) {
