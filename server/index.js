@@ -241,7 +241,7 @@ app.get('/api/speakText', async (req, res) => {
         return;
     }
 
-    function* sendUrl(gen, url) {
+    function* sendUrl(gen, url, index) {
         const body = {
             streamUrl: url,
             name: 'Sonos TTS',
@@ -280,15 +280,15 @@ app.get('/api/speakText', async (req, res) => {
                             return;
                         }
 
-                        console.log("Writing " + item.url);
+                        console.log("Writing " + url);
                         const file = fs.createWriteStream('temp.mp3');
-                        https.get(item.url, res => res.pipe(file));
+                        https.get(url, res => res.pipe(file));
                         file.on('finish', () => {
                             console.log("Done writing");
                             file.end();
                             getAudioDurationInSeconds('temp.mp3').then((duration) => {
                                 console.log("text takes: " + duration);
-                                if (speechUrls.indexOf(item) !== 0) {
+                                if (index !== 0) {
                                     const ms = duration * 1000;
                                     console.log("waiting %f ms", ms)
                                     setTimeout(gen(), duration * 1000);
@@ -312,9 +312,9 @@ app.get('/api/speakText', async (req, res) => {
 
     run(function* (gen) {
         for (const item of speechUrls) {
-
+            const index = speechUrls.indexOf(item);
             try {
-                yield* sendUrl(gen, item.url)
+                yield* sendUrl(gen, item.url, index);
             } catch (err) {
                 // speakTextRes.send(JSON.stringify({'success': false, error: err.stack}));
                 console.log("Oh oh...");
