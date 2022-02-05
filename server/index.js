@@ -31,14 +31,14 @@ const googleTTS = require('google-tts-api');
 const storage = require('node-persist');
 const https = require("https");
 const fs = require("fs");
-const { getAudioDurationInSeconds } = require('get-audio-duration')
+const {getAudioDurationInSeconds} = require('get-audio-duration')
 
 const options = {
     key: fs.readFileSync(".cert/my-site-key.pem"),
     cert: fs.readFileSync(".cert/chain.pem")
 };
 
-const timer = ms => new Promise( res => setTimeout(res, ms));
+const timer = ms => new Promise(res => setTimeout(res, ms));
 
 const app = express();
 app.use(bodyParser.urlencoded({extended: false}));
@@ -235,12 +235,21 @@ app.get('/api/speakText', async (req, res) => {
         speakTextRes.send(JSON.stringify({'success': false, error: err.stack}));
         return;
     }
+    const pipeline = promisify(stream.pipeline);
+
     try {
         for (const item of speechUrls) {
+
+            // Can this be simplified?
+
             https.get(item.url, (stream) => {
-                getAudioDurationInSeconds(stream).then((duration) => {
-                    console.log(duration);
-                });
+                const file = fs.createWriteStream("temp.mp3");
+                stream.pipe(file);
+            });
+
+            const stream = fs.createReadStream('temp.mp3');
+            getAudioDurationInSeconds(stream).then((duration) => {
+              console.log(duration);
             });
 
             if (speechUrls.indexOf(item) !== 0) {
