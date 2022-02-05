@@ -307,9 +307,9 @@ app.get('/api/speakText', async (req, res) => {
             });
         }
     }
-    run(function* () {
+    run(function* (gen) {
         try {
-            yield* sendUrls()
+            yield* sendUrls(gen)
         } catch (err) {
             // speakTextRes.send(JSON.stringify({'success': false, error: err.stack}));
             console.log("Oh oh...");
