@@ -239,72 +239,69 @@ app.get('/api/speakText', async (req, res) => {
 
     try {
         for (const item of speechUrls) {
-            promises.push( async () => {
-                const body = {
-                    streamUrl: item.url,
-                    name: 'Sonos TTS',
-                    appId: 'com.me.sonosspeech',
-                    priority: 'HIGH',
-                    volume: 40
-                };
+            const body = {
+                streamUrl: item.url,
+                name: 'Sonos TTS',
+                appId: 'com.me.sonosspeech',
+                priority: 'HIGH',
+                volume: 40
+            };
 
-                let audioClipRes;
+            let audioClipRes;
 
-                try { // And call the audioclip API, with the playerId in the url path, and the text in the JSON body
-                    audioClipRes = await fetch(`https://api.ws.sonos.com/control/api/v1/players/${playerId}/audioClip`, {
-                        method: 'POST',
-                        body: JSON.stringify(body),
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token.token.access_token}`
-                        },
-                    });
-                    console.log(audioClipRes)
-                } catch (err) {
-                    speakTextRes.send(JSON.stringify({'success': false, error: err.stack}));
+            try { // And call the audioclip API, with the playerId in the url path, and the text in the JSON body
+                audioClipRes = await fetch(`https://api.ws.sonos.com/control/api/v1/players/${playerId}/audioClip`, {
+                    method: 'POST',
+                    body: JSON.stringify(body),
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token.token.access_token}`
+                    },
+                });
+                console.log(audioClipRes)
+            } catch (err) {
+                speakTextRes.send(JSON.stringify({'success': false, error: err.stack}));
+                return;
+            }
+            const audioClipResText = await audioClipRes.text(); // Same thing as above: convert to text, since occasionally the Sonos API returns text
+
+            try {
+                const json = JSON.parse(audioClipResText);
+                console.log(json)
+
+                if (json.id !== undefined) {
+                    console.log('Sent "${item.shortText}"')
+                } else {
+                    speakTextRes.send(JSON.stringify({'success': false, 'error': json.errorCode}));
                     return;
                 }
-                const audioClipResText = await audioClipRes.text(); // Same thing as above: convert to text, since occasionally the Sonos API returns text
+            } catch (err) {
+                speakTextRes.send(JSON.stringify({'success': false, 'error': audioClipResText}));
+                return;
+            }
 
-                try {
-                    const json = JSON.parse(audioClipResText);
-                    console.log(json)
+            // Can this be simplified?
 
-                    if (json.id !== undefined) {
-                        console.log('Sent "${item.shortText}"')
-                    } else {
-                        speakTextRes.send(JSON.stringify({'success': false, 'error': json.errorCode}));
-                        return;
+            console.log("Writing " + item.url);
+            const file = fs.createWriteStream('temp.mp3');
+            await https.get(item.url, res => res.pipe(file));
+            await file.on('finish',  () => {
+                console.log("Done writing");
+                file.end();
+                 getAudioDurationInSeconds('temp.mp3').then((duration) => {
+                    console.log("text takes: " + duration);
+                    if (speechUrls.indexOf(item) !== 0) {
+                        (async function () {
+                            const ms = duration * 1000;
+                            console.log("waiting %f ms", ms)
+                            await timer(duration * 1000);
+                            console.log("done!")
+                        })()
                     }
-                } catch (err) {
-                    speakTextRes.send(JSON.stringify({'success': false, 'error': audioClipResText}));
-                    return;
-                }
-
-                // Can this be simplified?
-
-                console.log("Writing " + item.url);
-                const file = fs.createWriteStream('temp.mp3');
-                await https.get(item.url, res => res.pipe(file));
-                await file.on('finish', async () => {
-                    console.log("Done writing");
-                    file.end();
-                    await getAudioDurationInSeconds('temp.mp3').then(async (duration) => {
-                        console.log("text takes: " + duration);
-                        if (speechUrls.indexOf(item) !== 0) {
-                            await (async function () {
-                                const ms = duration * 1000;
-                                console.log("waiting %f ms", ms)
-                                await timer(duration * 1000);
-                                console.log("done!")
-                            })()
-                        }
-                    });
                 });
             });
-        }
 
-        await Promise.all(promises);
+        }
     } catch (err) {
         speakTextRes.send(JSON.stringify({'success': false, error: err.stack}));
         return;
