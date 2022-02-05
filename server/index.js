@@ -31,7 +31,7 @@ const googleTTS = require('google-tts-api');
 const storage = require('node-persist');
 const https = require("https");
 const fs = require("fs");
-const getAudioDurationInSeconds = require('get-audio-duration')
+const { getAudioDurationInSeconds } = require('get-audio-duration')
 
 const options = {
     key: fs.readFileSync(".cert/my-site-key.pem"),
