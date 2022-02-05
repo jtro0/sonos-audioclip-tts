@@ -267,8 +267,13 @@ app.get('/api/speakText', async (req, res) => {
                 speakTextRes.send(JSON.stringify({'success': false, error: err.stack}));
                 return;
             }
-            const audioClipResText = await audioClipRes.text(); // Same thing as above: convert to text, since occasionally the Sonos API returns text
+            let audioClipResText;
 
+            try {
+                audioClipResText = await audioClipRes.text(); // Same thing as above: convert to text, since occasionally the Sonos API returns text
+            } catch (err) {
+                console.log(audioClipRes);
+            }
             try {
                 const json = JSON.parse(audioClipResText);
                 console.log(json)
