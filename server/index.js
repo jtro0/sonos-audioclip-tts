@@ -267,12 +267,14 @@ app.get('/api/speakText', async (req, res) => {
                 console.log(json)
 
                 if (json.id !== undefined) {
-                    speakTextRes.send(JSON.stringify({'success': true}));
+                    console.log('Sent "${item.shortText}"')
                 } else {
                     speakTextRes.send(JSON.stringify({'success': false, 'error': json.errorCode}));
+                    return;
                 }
             } catch (err) {
                 speakTextRes.send(JSON.stringify({'success': false, 'error': audioClipResText}));
+                return;
             }
             await (async function () {
                 console.log("waiting 1 second...")
@@ -282,7 +284,11 @@ app.get('/api/speakText', async (req, res) => {
         }
     } catch (err) {
         speakTextRes.send(JSON.stringify({'success': false, error: err.stack}));
+        return;
     }
+
+    speakTextRes.send(JSON.stringify({'success': true}));
+
 });
 
 app.get('/api/chime', async (req, res) => {
