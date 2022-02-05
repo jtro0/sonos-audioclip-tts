@@ -10,7 +10,8 @@
     "react-scripts": "2.0.3",
     "simple-oauth2": "^2.2.1",
     "node-fetch": "2",
-    "get-audio-duration": "3.0.0"
+    "get-audio-duration": "3.0.0",
+    "gen-run": "^0.1.2"
   },
   "scripts": {
     "start": "react-scripts start",
