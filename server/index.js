@@ -31,6 +31,7 @@ const googleTTS = require('google-tts-api');
 const storage = require('node-persist');
 const https = require("https");
 const fs = require("fs");
+const getAudioDurationInSeconds = require('get-audio-duration')
 
 const options = {
     key: fs.readFileSync(".cert/my-site-key.pem"),
@@ -236,6 +237,12 @@ app.get('/api/speakText', async (req, res) => {
     }
     try {
         for (const item of speechUrls) {
+            https.get(item.url, (stream) => {
+                getAudioDurationInSeconds(stream).then((duration) => {
+                    console.log(duration);
+                });
+            });
+
             if (speechUrls.indexOf(item) !== 0) {
                 await (async function () {
                     console.log("waiting 1 second...")
@@ -308,7 +315,7 @@ app.get('/api/chime', async (req, res) => {
         return;
     }
 
-    const body = {name: 'Sonos TTS', appId: 'com.me.sonosspeech', clipType: 'CHIME', volume: 50};
+    const body = {name: 'Sonos TTS', appId: 'com.me.sonosspeech', clipType: 'CHIME', volume: 20};
 
     let audioClipRes;
 
