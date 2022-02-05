@@ -239,20 +239,6 @@ app.get('/api/speakText', async (req, res) => {
     try {
         for (const item of speechUrls) {
 
-            // Can this be simplified?
-
-            console.log("Writing " + item.url);
-            const file = fs.createWriteStream('temp.mp3');
-            await https.get(item.url, res => res.pipe(file));
-            let duration;
-            file.on('finish', async () => {
-                console.log("Done writing");
-                file.end();
-                getAudioDurationInSeconds('temp.mp3').then((durr) => {
-                    console.log("text takes: " + duration);
-                    duration = durr;
-                });
-            });
 
             const body = {
                 streamUrl: item.url,
@@ -295,14 +281,27 @@ app.get('/api/speakText', async (req, res) => {
                 return;
             }
 
-            if (speechUrls.indexOf(item) !== 0) {
-                await (async function () {
-                    const ms = duration*1000;
-                    console.log("waiting %f ms", ms)
-                    await timer(duration*1000);
-                    console.log("done!")
-                })()
-            }
+            // Can this be simplified?
+
+            console.log("Writing " + item.url);
+            const file = fs.createWriteStream('temp.mp3');
+            await https.get(item.url, res => res.pipe(file));
+            file.on('finish', async () => {
+                console.log("Done writing");
+                file.end();
+                getAudioDurationInSeconds('temp.mp3').then(async (duration) => {
+                    console.log("text takes: " + duration);
+                    if (speechUrls.indexOf(item) !== 0) {
+                        await(async function () {
+                            const ms = duration * 1000;
+                            console.log("waiting %f ms", ms)
+                            await timer(duration * 1000);
+                            console.log("done!")
+                        })()
+                    }
+                });
+            });
+
         }
     } catch (err) {
         speakTextRes.send(JSON.stringify({'success': false, error: err.stack}));
