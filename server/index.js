@@ -248,7 +248,7 @@ app.get('/api/speakText', async (req, res) => {
                 streamUrl: url,
                 name: 'Sonos TTS',
                 appId: 'com.me.sonosspeech',
-                priority: 'HIGH',
+                priority: 'LOW',
                 volume: 40
             };
 
