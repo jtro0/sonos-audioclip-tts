@@ -249,7 +249,7 @@ app.get('/api/speakText', async (req, res) => {
                 name: 'Sonos TTS',
                 appId: 'com.me.sonosspeech',
                 priority: 'HIGH',
-                volume: 30
+                volume: 40
             };
 
             try { // And call the audioclip API, with the playerId in the url path, and the text in the JSON body
@@ -332,9 +332,9 @@ app.get('/api/chime', async (req, res) => {
     }
 
     const body = {
-        streamUrl: req.get('host') + '/util/chime',
+        streamUrl: 'https://picroft.jtroo.nl:3002/util/chime',
         name: 'Sonos TTS',
-        appId: 'com.me.sonosspeech', volume: 20
+        appId: 'com.me.sonosspeech', volume: 40, priority: "HIGH"
     };
 
     let audioClipRes;
@@ -370,7 +370,6 @@ app.get("/util/chime", async (req, res) => {
 
     const chimeAudioRes = res;
     chimeAudioRes.setHeader('Content-Type', 'audio/wav');
-    chimeAudioRes.setHeader('Content-Length', stat.size);
 
     if (authRequired) {
         chimeAudioRes.send(JSON.stringify({'success': false, authRequired: true}));
