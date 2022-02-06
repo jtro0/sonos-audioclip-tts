@@ -360,6 +360,21 @@ app.get('/api/chime', async (req, res) => {
     }
 });
 
+app.get("/util/chime", async (req, res) => {
+    const filePath = "./chime.wav";
+    const stat = fs.statSync(filePath);
+
+    const chimeAudioRes = res;
+    chimeAudioRes.setHeader('Content-Type', 'audio/wav');
+    chimeAudioRes.setHeader('Content-Length', stat.size);
+
+    if (authRequired) {
+        chimeAudioRes.send(JSON.stringify({'success': false, authRequired: true}));
+    }
+
+    fs.createReadStream(filePath).pipe(chimeAudioRes);
+});
+
 app.listen(3001, () =>
     console.log('Express server is running on localhost:3001')
 );
