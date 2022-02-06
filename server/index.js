@@ -285,8 +285,8 @@ app.get('/api/speakText', async (req, res) => {
                                 file.end();
                                 getAudioDurationInSeconds('temp.mp3').then((duration) => {
                                     console.log("text takes: " + duration);
-                                        const ms = duration * 1000;
-                                        setTimeout(gen(), ms);
+                                    const ms = duration * 1000;
+                                    setTimeout(gen(), ms);
                                 });
                             });
                         }); // Same thing as above: convert to text, since occasionally the Sonos API returns text
@@ -305,12 +305,12 @@ app.get('/api/speakText', async (req, res) => {
 
     run(function* (gen) {
 
-            try {
-                yield* sendUrl(gen);
-            } catch (err) {
-                // speakTextRes.send(JSON.stringify({'success': false, error: err.stack}));
-                console.log("Oh oh...");
-            }
+        try {
+            yield* sendUrl(gen);
+        } catch (err) {
+            // speakTextRes.send(JSON.stringify({'success': false, error: err.stack}));
+            console.log("Oh oh...");
+        }
     });
 
     speakTextRes.send(JSON.stringify({'success': true}));
@@ -331,7 +331,11 @@ app.get('/api/chime', async (req, res) => {
         return;
     }
 
-    const body = {name: 'Sonos TTS', appId: 'com.me.sonosspeech', clipType: 'CHIME', volume: 20};
+    const body = {
+        streamUrl: req.get('host') + '/util/chime',
+        name: 'Sonos TTS',
+        appId: 'com.me.sonosspeech', volume: 20
+    };
 
     let audioClipRes;
 
