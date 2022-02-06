@@ -334,7 +334,7 @@ app.get('/api/chime', async (req, res) => {
     const body = {
         streamUrl: 'https://picroft.jtroo.nl:3002/util/chime',
         name: 'Sonos TTS',
-        appId: 'com.me.sonosspeech', volume: 40, priority: "HIGH"
+        appId: 'com.me.sonosspeech', volume: 60, priority: "HIGH"
     };
 
     let audioClipRes;
